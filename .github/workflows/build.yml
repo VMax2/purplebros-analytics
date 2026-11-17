@@ -64,7 +64,8 @@ jobs:
 
           echo "TARGET_TAG=$TAG" >> $GITHUB_ENV
           echo "SHOULD_BUILD=$SHOULD_BUILD" >> $GITHUB_ENV
-          echo "IMAGE_NAME=ghcr.io/${{ github.repository_owner }}/purplebros-analytics" >> $GITHUB_ENV
+          OWNER_LC=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          echo "IMAGE_NAME=ghcr.io/${OWNER_LC}/purplebros-analytics" >> $GITHUB_ENV
 
       - name: Clona Repository Ufficiale di Umami
         if: env.SHOULD_BUILD == 'true'

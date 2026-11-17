@@ -18,8 +18,7 @@ def generate():
     box = (cx - 360, cy - 360, cx + 360, cy + 360)
     crop_scuro = im_scuro.crop(box)
 
-    # Maschera circolare antialiased
-    # Per avere bordi ultra-morbidi, generiamo una maschera 4x e poi facciamo il downscale
+    # Maschera circolare antialiased 4x
     mask_large = Image.new('L', (720 * 4, 720 * 4), 0)
     draw_large = ImageDraw.Draw(mask_large)
     draw_large.ellipse((4 * 4, 4 * 4, 716 * 4, 716 * 4), fill=255)
@@ -51,7 +50,21 @@ def generate():
     apple.save(apple_path, format='PNG')
     print(f"✔ Generato: {apple_path}")
 
-    # 5. Multi-size Favicon.ico (16, 32, 48, 64)
+    # 5. Android Chrome 192x192 e 512x512
+    a192_path = os.path.join(branding_dir, 'android-chrome-192x192.png')
+    a192 = scuro_rgba.resize((192, 192), Image.Resampling.LANCZOS)
+    a192.save(a192_path, format='PNG')
+
+    a512_path = os.path.join(branding_dir, 'android-chrome-512x512.png')
+    a512 = scuro_rgba.resize((512, 512), Image.Resampling.LANCZOS)
+    a512.save(a512_path, format='PNG')
+
+    # 6. Mstile 150x150
+    ms_path = os.path.join(branding_dir, 'mstile-150x150.png')
+    ms150 = scuro_rgba.resize((150, 150), Image.Resampling.LANCZOS)
+    ms150.save(ms_path, format='PNG')
+
+    # 7. Multi-size Favicon.ico (16, 32, 48, 64)
     ico_path = os.path.join(branding_dir, 'favicon.ico')
     fav_master = scuro_rgba.resize((256, 256), Image.Resampling.LANCZOS)
     fav_master.save(
@@ -61,7 +74,7 @@ def generate():
     )
     print(f"✔ Generato: {ico_path}")
 
-    # 6. logo.svg (utilizzato da Umami nella navbar e nel login)
+    # 8. logo.svg (utilizzato da Umami nella navbar e nel login)
     fav512 = scuro_rgba.resize((512, 512), Image.Resampling.LANCZOS)
     buf = BytesIO()
     fav512.save(buf, format='PNG', optimize=True)
@@ -75,6 +88,12 @@ def generate():
     with open(svg_path, 'w', encoding='utf-8') as f:
         f.write(svg_content)
     print(f"✔ Generato: {svg_path}")
+
+    # 9. safari-pinned-tab.svg
+    safari_path = os.path.join(branding_dir, 'safari-pinned-tab.svg')
+    with open(safari_path, 'w', encoding='utf-8') as f:
+        f.write(svg_content)
+    print(f"✔ Generato: {safari_path}")
 
 if __name__ == '__main__':
     generate()

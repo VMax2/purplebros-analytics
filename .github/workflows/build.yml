@@ -87,8 +87,9 @@ jobs:
           fi
 
           if [ -d "../custom-config/branding" ]; then
-            cp -r ../custom-config/branding/* public/ 2>/dev/null || true
-            echo "✔ Favicon e icone copiate in public/"
+            cp -rf ../custom-config/branding/* public/ 2>/dev/null || true
+            cp -f ../custom-config/branding/favicon.ico src/app/favicon.ico 2>/dev/null || true
+            echo "✔ Favicon e icone copiate in public/ e src/app/"
           fi
 
       - name: Esecuzione Script di Rebranding Testuale

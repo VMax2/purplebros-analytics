@@ -7,9 +7,9 @@ on:
   workflow_dispatch:
     inputs:
       version_tag:
-        description: 'Tag versione Umami (es. v2.14.0). Lascia vuoto per compilare l'ultima release stabile.'
+        description: "Tag versione Umami (es. v2.14.0). Lascia vuoto per compilare l'ultima release stabile."
         required: false
-        default: ''
+        default: ""
       force_build:
         description: 'Forza la ricompilazione anche se il tag esiste già'
         type: boolean

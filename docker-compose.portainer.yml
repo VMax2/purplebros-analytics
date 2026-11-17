@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  umami:
+    # Immagine personalizzata PurpleBros pubblicata su GHCR
+    image: ghcr.io/vmax2/purplebros-analytics:latest
+    container_name: umami
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://umami:umami@db:5432/umami
+      DATABASE_TYPE: postgresql
+      HASH_SALT: 8f2a89494cffe129a4aec4f57055e5cbcb0cef48420ff5643b5e801d4537f21e
+      APP_SECRET: D5oyvQrex!1O9ZBiQeDO9%PWMeI!rVrr
+      CLIENT_IP_HEADER: CF-Connecting-IP
+      DISABLE_TELEMETRY: 1
+      TRACKER_SCRIPT_NAME: PurpleBros
+      FORCE_SSL: 1
+      HOSTNAME: '0.0.0.0'
+    depends_on:
+      - db
+    restart: always
+    networks:
+      - nginx-proxy-manager-network
+    labels:
+      # Watchtower monitora questa immagine (in sola lettura/notifica o auto-update a seconda della tua config)
+      - "com.centurylinklabs.watchtower.enable=true"
+
+  db:
+    image: postgres:15-alpine
+    container_name: umami-db
+    environment:
+      POSTGRES_DB: umami
+      POSTGRES_USER: umami
+      POSTGRES_PASSWORD: umami
+    volumes:
+      - /home/max/AppData/Umami/db:/var/lib/postgresql/data
+    restart: always
+    networks:
+      - nginx-proxy-manager-network
+    labels:
+      # Escludiamo il database dai controlli di Watchtower
+      - "com.centurylinklabs.watchtower.enable=false"
+
+networks:
+  nginx-proxy-manager-network:
+    external: true

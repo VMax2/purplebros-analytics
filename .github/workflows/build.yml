@@ -79,16 +79,15 @@ jobs:
           echo "Iniezione file di branding..."
           cd umami-src
 
+          mkdir -p src/assets
           if [ -f "../custom-config/branding/logo.svg" ]; then
-            cp ../custom-config/branding/logo.svg src/assets/logo.svg
-            echo "✔ logo.svg iniettato in src/assets/"
+            cp ../custom-config/branding/logo.svg src/assets/logo.svg 2>/dev/null || true
+            cp ../custom-config/branding/logo.svg public/logo.svg 2>/dev/null || true
+            echo "✔ logo.svg iniettato"
           fi
 
           if [ -d "../custom-config/branding" ]; then
             cp -r ../custom-config/branding/* public/ 2>/dev/null || true
-            if [ -f "../custom-config/branding/logo.svg" ]; then
-              cp ../custom-config/branding/logo.svg src/assets/logo.svg
-            fi
             echo "✔ Favicon e icone copiate in public/"
           fi
 

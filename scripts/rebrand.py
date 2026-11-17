@@ -2,10 +2,11 @@
 """
 PurpleBros Analytics - Rebranding Engine
 Questo script viene invocato durante la GitHub Action per effettuare modifiche mirate
-ai file grafici, ai titoli, ai layout e ai metadati, preservando il codice sorgente
+ai componenti del logo, ai titoli, ai layout e ai metadati, preservando il codice sorgente
 di backend, database e dipendenze interne.
 """
 
+import base64
 import os
 import re
 import sys
@@ -55,7 +56,6 @@ def patch_messages():
             with open(file_path, "r", encoding="utf-8") as f:
                 content = f.read()
 
-            # Sostituisce solo menzioni visibili e isolate
             new_content = re.sub(r'\bUmami\b', 'PurpleBros Analytics', content)
             new_content = re.sub(r'\bumami\b', 'PurpleBros Analytics', new_content)
 
@@ -78,7 +78,6 @@ def patch_jsx_branding_text():
                     with open(full_path, "r", encoding="utf-8") as f:
                         text = f.read()
 
-                    # Sostituzione sicura solo per elementi visibili tra tag JSX: >umami< o >Umami<
                     new_text, count = re.subn(r'>\s*umami\s*<', '>PurpleBros Analytics<', text, flags=re.IGNORECASE)
                     
                     if count > 0:
@@ -86,21 +85,73 @@ def patch_jsx_branding_text():
                             f.write(new_text)
                         print(f"  ✔ Testo JSX aggiornato ({count} occorrenze) in: {full_path}")
 
-def patch_dockerfile():
-    """Assicura che le icone SVG vengano rigenerate durante la compilazione dell'immagine Docker."""
-    dockerfile_path = "Dockerfile"
-    if os.path.exists(dockerfile_path):
-        with open(dockerfile_path, "r", encoding="utf-8") as f:
-            df = f.read()
+def patch_logo_components():
+    """
+    Sostituisce direttamente i componenti Logo.tsx e LogoWhite.tsx in src/components/svg/
+    senza dover eseguire SVGR (evitando di sovrascrivere o eliminare le altre icone di sistema).
+    """
+    badge_paths = [
+        "../custom-config/branding/master-badge-scuro.png",
+        "../custom-config/branding/favicon-32x32.png",
+    ]
+    
+    badge_file = None
+    for bp in badge_paths:
+        if os.path.exists(bp):
+            badge_file = bp
+            break
 
-        if "pnpm build:icons" not in df:
-            if "RUN pnpm build:docker" in df:
-                df = df.replace("RUN pnpm build:docker", "RUN pnpm build:icons\nRUN pnpm build:docker")
-                with open(dockerfile_path, "w", encoding="utf-8") as f:
-                    f.write(df)
-                print("  ✔ Dockerfile aggiornato con step 'pnpm build:icons'")
-            else:
-                print("  ℹ Nessun comando 'pnpm build:docker' trovato nel Dockerfile standard.")
+    if not badge_file:
+        print("  ⚠ Badge PNG non trovato per il componente Logo.")
+        return
+
+    with open(badge_file, "rb") as f:
+        b64_data = base64.b64encode(f.read()).decode("utf-8")
+
+    logo_component_code = f"""import type {{ SVGProps }} from 'react';
+
+const SvgLogo = (props: SVGProps<SVGSVGElement>) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 512 512"
+    width={{20}}
+    height={{20}}
+    {{...props}}
+  >
+    <image href="data:image/png;base64,{b64_data}" width="512" height="512" />
+  </svg>
+);
+
+export default SvgLogo;
+"""
+
+    logo_white_code = f"""import type {{ SVGProps }} from 'react';
+
+const SvgLogoWhite = (props: SVGProps<SVGSVGElement>) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 512 512"
+    width={{20}}
+    height={{20}}
+    {{...props}}
+  >
+    <image href="data:image/png;base64,{b64_data}" width="512" height="512" />
+  </svg>
+);
+
+export default SvgLogoWhite;
+"""
+
+    target_files = [
+        ("src/components/svg/Logo.tsx", logo_component_code),
+        ("src/components/svg/LogoWhite.tsx", logo_white_code),
+    ]
+
+    for path, code in target_files:
+        if os.path.exists(os.path.dirname(path)):
+            with open(path, "w", encoding="utf-8") as f:
+                f.write(code)
+            print(f"  ✔ Componente React sostituito: {path}")
 
 def main():
     print("=" * 60)
@@ -110,7 +161,7 @@ def main():
     patch_layout_metadata()
     patch_messages()
     patch_jsx_branding_text()
-    patch_dockerfile()
+    patch_logo_components()
     
     print("=" * 60)
     print("✅ Rebranding completato con successo!")

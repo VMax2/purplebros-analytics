@@ -105,21 +105,27 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Set up QEMU
+        if: env.SHOULD_BUILD == 'true'
+        uses: docker/setup-qemu-action@v3
+
       - name: Setup Docker Buildx
         if: env.SHOULD_BUILD == 'true'
         uses: docker/setup-buildx-action@v3
 
-      - name: Compilazione e Pubblicazione Immagine Docker (PostgreSQL)
+      - name: Compilazione e Pubblicazione Immagine Docker (PostgreSQL Multi-Arch)
         if: env.SHOULD_BUILD == 'true'
         uses: docker/build-push-action@v5
         with:
           context: ./umami-src
           file: ./umami-src/Dockerfile
+          platforms: linux/amd64,linux/arm64
           build-args: |
             DATABASE_TYPE=postgresql
           push: true
           tags: |
             ${{ env.IMAGE_NAME }}:latest
+            ${{ env.IMAGE_NAME }}:postgresql-latest
             ${{ env.IMAGE_NAME }}:${{ env.TARGET_TAG }}
           cache-from: type=gha
           cache-to: type=gha,mode=max

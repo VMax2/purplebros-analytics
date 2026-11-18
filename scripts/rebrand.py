@@ -84,7 +84,7 @@ def patch_layout_metadata():
                     print(f"  ✔ Metadati/Titoli aggiornati in: {file_path}")
 
 def patch_login_logo_size():
-    """Ingrandisce il logo nella schermata di login, 2FA e logout a 80x80px."""
+    """Ingrandisce il logo nella schermata di login, 2FA e logout a 100x100px (stile WordPress login)."""
     target_files = [
         "src/app/login/LoginForm.tsx",
         "src/app/login/two-factor/LoginTwoFactorPage.tsx",
@@ -96,22 +96,22 @@ def patch_login_logo_size():
             with open(file_path, "r", encoding="utf-8") as f:
                 content = f.read()
 
-            # Sostituisce <Icon size="lg"><Logo /></Icon> con <Logo style={{ width: 80, height: 80 }} />
+            # Sostituisce <Icon size="lg"><Logo /></Icon> con <Logo style={{ width: 100, height: 100 }} />
             new_content = re.sub(
                 r'<Icon[^>]*>\s*<Logo\s*/>\s*</Icon>',
-                '<Logo style={{ width: 80, height: 80 }} />',
+                '<Logo style={{ width: 100, height: 100 }} />',
                 content
             )
             new_content = re.sub(
                 r'<Icon[^>]*>\s*<LogoWhite\s*/>\s*</Icon>',
-                '<LogoWhite style={{ width: 80, height: 80 }} />',
+                '<LogoWhite style={{ width: 100, height: 100 }} />',
                 new_content
             )
 
             if new_content != content:
                 with open(file_path, "w", encoding="utf-8") as f:
                     f.write(new_content)
-                print(f"  ✔ Logo login ingrandito a 80x80px in: {file_path}")
+                print(f"  ✔ Logo login ingrandito a 100x100px in: {file_path}")
 
 def patch_logo_components():
     """
